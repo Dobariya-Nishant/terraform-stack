@@ -1,9 +1,9 @@
 output "efs" {
   value = {
     jenkins = {
-      id                = module.jenkins_efs.id
-      name              = module.jenkins_efs.name
-      arn               = module.jenkins_efs.arn
+      id            = module.jenkins_efs.id
+      name          = module.jenkins_efs.name
+      arn           = module.jenkins_efs.arn
       access_points = module.jenkins_efs.access_points
     }
   }

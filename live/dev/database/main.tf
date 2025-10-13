@@ -8,8 +8,8 @@ module "docdb" {
   name            = "backend"
   project_name    = var.project_name
   environment     = var.environment
-  username        = var.project_name
-  password        = var.environment
+  username        = "activatree_admin"
+  password        = "activatree_admin"
   subnet_ids      = local.subnets["docdb"]
   security_groups = [local.sg["docdb"]]
 }

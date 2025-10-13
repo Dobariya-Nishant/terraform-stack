@@ -1,5 +1,5 @@
 locals {
-  route53 = data.terraform_remote_state.network.outputs.route53
+  route53 = data.terraform_remote_state.global.outputs.route53
   vpc_id  = data.terraform_remote_state.network.outputs.vpc_id
   subnets = data.terraform_remote_state.network.outputs.subnets
   sg      = data.terraform_remote_state.network.outputs.sg
@@ -31,6 +31,13 @@ module "frontend_alb" {
       target_type       = "ip"
       health_check_path = "/"
     }
+    api = {
+      name              = "api"
+      port              = 80
+      protocol          = "HTTP"
+      target_type       = "ip"
+      health_check_path = "/"
+    }
   }
   listener = {
     name             = "frontend"
@@ -39,7 +46,12 @@ module "frontend_alb" {
       jenkins_rule = {
         description      = "Jenkins path routing"
         target_group_key = "jenkins"
-        hosts            = ["jenkins.dev.activatree.com"]
+        hosts            = ["jenkins.${local.route53.domain_name}"]
+      }
+      api_rule = {
+        description      = "Jenkins path routing"
+        target_group_key = "api"
+        patterns         = ["/api*"]
       }
     }
   }
@@ -53,8 +65,8 @@ module "jenkins_asg" {
   subnet_ids       = local.subnets["asg"]
   security_groups  = [local.sg["asg"]]
   ecs_cluster_name = var.ecs_cluster_name
-  desired_capacity = 1
-  max_size         = 2
+  desired_capacity = 0
+  max_size         = 0
   min_size         = 0
 }
 

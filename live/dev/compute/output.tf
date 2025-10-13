@@ -1,10 +1,10 @@
 output "alb" {
   value = {
     frontend = {
-      id   = module.frontend_alb.id
+      id           = module.frontend_alb.id
       listener_arn = module.frontend_alb.listener_arn
-      blue_tg  = module.frontend_alb.blue_tg
-      green_tg  = module.frontend_alb.green_tg
+      blue_tg      = module.frontend_alb.blue_tg
+      green_tg     = module.frontend_alb.green_tg
     }
   }
 }

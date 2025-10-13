@@ -9,8 +9,8 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "cardstudio-terraform-state-bucket"
-    key            = "stag/compute/terraform.tfstate"
+    bucket         = "activatree-terraform"
+    key            = "dev/compute/terraform.tfstate"
     dynamodb_table = "tf-backend-lock"
     region         = "us-east-1"
     encrypt        = true

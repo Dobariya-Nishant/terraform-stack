@@ -46,15 +46,15 @@ variable "memory" {
 variable "containers" {
   description = "List of container definitions for the ECS task (camelCase for ECS API)."
   type = list(object({
-    name               = string
-    image              = string
-    essential          = optional(bool, true)
-    cpu                = optional(number)
-    memory             = optional(number)
-    memoryReservation  = optional(number)
-    command            = optional(list(string))
-    entryPoint         = optional(list(string))
-    workingDirectory   = optional(string)
+    name              = string
+    image             = string
+    essential         = optional(bool, true)
+    cpu               = optional(number)
+    memory            = optional(number)
+    memoryReservation = optional(number)
+    command           = optional(list(string))
+    entryPoint        = optional(list(string))
+    workingDirectory  = optional(string)
 
     portMappings = optional(list(object({
       containerPort = number

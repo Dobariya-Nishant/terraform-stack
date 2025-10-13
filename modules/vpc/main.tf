@@ -346,7 +346,7 @@ resource "aws_security_group" "backend" {
     from_port       = 80
     to_port         = 80
     protocol        = "tcp"
-    security_groups = [aws_security_group.backend_alb.id]
+    security_groups = [aws_security_group.frontend_alb.id]
   }
 
   egress {
@@ -379,7 +379,7 @@ resource "aws_security_group" "asg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["${data.http.my_ip.body}/32"]
+    security_groups = [aws_security_group.bastion_ec2.id]
   }
 
   egress {
@@ -405,7 +405,7 @@ resource "aws_security_group" "bastion_ec2" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["${data.http.my_ip.body}/32"]
+    cidr_blocks = ["${chomp(data.http.my_ip.response_body)}/32"]
   }
 
   egress {
@@ -431,7 +431,7 @@ resource "aws_security_group" "docdb" {
     from_port       = 27017
     to_port         = 27017
     protocol        = "tcp"
-    security_groups = [aws_security_group.backend.id]
+    security_groups = [aws_security_group.backend.id, aws_security_group.bastion_ec2.id]
   }
 
   egress {

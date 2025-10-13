@@ -13,8 +13,4 @@ module "vpc" {
   enable_nat_gateway = true
 }
 
-module "route53" {
-  source      = "../../../modules/route53"
-  domain_name = "dev.activatree.com"
-}
 

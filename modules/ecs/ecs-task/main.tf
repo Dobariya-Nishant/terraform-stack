@@ -23,7 +23,7 @@ resource "aws_ecs_task_definition" "this" {
     for_each = var.volumes
     content {
       name = volume.value.name
-      
+
       dynamic "efs_volume_configuration" {
         for_each = volume.value.efs_volume_configuration != null ? [volume.value.efs_volume_configuration] : []
         content {
