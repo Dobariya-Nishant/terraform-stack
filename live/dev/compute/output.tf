@@ -29,11 +29,11 @@ output "asg" {
   }
 }
 
-output "ec2" {
-  value = {
-    bastion = {
-      id  = module.bastion_ec2.id
-      arn = module.bastion_ec2.arn
-    }
-  }
-}
+# output "ec2" {
+#   value = {
+#     bastion = {
+#       id  = module.bastion_ec2.id
+#       arn = module.bastion_ec2.arn
+#     }
+#   }
+# }

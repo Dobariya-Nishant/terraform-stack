@@ -18,94 +18,167 @@ module "ecs_cluster" {
       arn             = local.asg["jenkins"].arn
       target_capacity = 100
     }
+    backend = {
+      name            = "backend"
+      arn             = local.asg["backend"].arn
+      target_capacity = 100
+    }
+    frontend = {
+      name            = "frontend"
+      arn             = local.asg["frontend"].arn
+      target_capacity = 100
+    }
   }
 }
 
-module "jenkins_service" {
+# module "jenkins_service" {
+#   source                 = "../../../modules/ecs/ecs-service"
+#   project_name           = var.project_name
+#   environment            = var.environment
+#   capacity_provider_name = module.ecs_cluster.asg_cp["jenkins"].name
+#   name                   = "jenkins"
+#   ecs_cluster_id         = module.ecs_cluster.id
+#   ecs_cluster_name       = module.ecs_cluster.name
+#   desired_count          = 1
+#   subnet_ids             = local.subnets["frontend"]
+#   security_groups        = [local.sg["jenkins"]]
+#   container_port         = 8080
+#   alb_blue_tg_arn        = local.alb["frontend"]["blue_tg"]["jenkins"].arn
+#   container_name         = "jenkins"
+#   task_definition_arn    = module.frontend_task.arn
+# }
+
+# resource "aws_cloudwatch_log_group" "jenkins" {
+#   name              = "/ecs/jenkins"
+#   retention_in_days = 7
+# }
+
+# module "frontend_task" {
+#   source                   = "../../../modules/ecs/ecs-task"
+#   project_name             = var.project_name
+#   environment              = var.environment
+#   family                   = "frontend"
+#   requires_compatibilities = ["EC2"]
+#   cpu                      = 1024
+#   memory                   = 700
+
+#   containers = [
+#     {
+#       name      = "jenkins"
+#       cpu       = 1024
+#       memory    = 700
+#       image     = "jenkins/jenkins:lts-alpine"
+#       essential = true
+
+#       portMappings = [
+#         {
+#           containerPort = 8080
+#           hostPort      = 8080
+#           protocol      = "tcp"
+#         }
+#       ]
+
+#       mountPoints = [
+#         {
+#           sourceVolume  = "jenkins_efs"
+#           containerPath = "/var/jenkins_home"
+#           readOnly      = false
+#         }
+#       ]
+
+#       logConfiguration = {
+#         logDriver = "awslogs"
+#         options = {
+#           "awslogs-group"         = "/ecs/jenkins"
+#           "awslogs-region"        = var.region
+#           "awslogs-stream-prefix" = "ecs"
+#         }
+#       }
+
+#       healthCheck = {
+#         command     = ["CMD", "curl", "-f", "http://localhost:8080/login"]
+#         interval    = 200
+#         timeout     = 5
+#         retries     = 3
+#         startPeriod = 300
+#       }
+#     }
+#   ]
+
+#   volumes = [
+#     {
+#       name = "jenkins_efs"
+#       efs_volume_configuration = {
+#         file_system_id     = local.efs["jenkins"].id
+#         transit_encryption = "ENABLED"
+#         authorization_config = {
+#           access_point_id = local.efs["jenkins"].access_points["jenkins"].id
+#           iam             = "DISABLED"
+#         }
+#       }
+#     }
+#   ]
+# }
+
+
+
+
+module "backend_service" {
   source                 = "../../../modules/ecs/ecs-service"
   project_name           = var.project_name
   environment            = var.environment
-  capacity_provider_name = module.ecs_cluster.asg_cp["jenkins"].name
-  name                   = "jenkins"
+  capacity_provider_name = module.ecs_cluster.asg_cp["backend"].name
+  name                   = "backend"
   ecs_cluster_id         = module.ecs_cluster.id
   ecs_cluster_name       = module.ecs_cluster.name
   desired_count          = 1
-  subnet_ids             = local.subnets["frontend"]
-  security_groups        = [local.sg["jenkins"]]
-  container_port         = 8080
-  alb_blue_tg_arn        = local.alb["frontend"]["blue_tg"]["jenkins"].arn
-  container_name         = "jenkins"
-  task_definition_arn    = module.frontend_task.arn
+  subnet_ids             = local.subnets["backend"]
+  security_groups        = [local.sg["backend"]]
+  container_port         = 80
+  alb_blue_tg_arn        = local.alb["frontend"]["blue_tg"]["api"].arn
+  container_name         = "backend"
+  task_definition_arn    = module.backend_task.arn
 }
 
-resource "aws_cloudwatch_log_group" "jenkins" {
-  name              = "/ecs/jenkins"
+resource "aws_cloudwatch_log_group" "backend" {
+  name              = "/ecs/backend"
   retention_in_days = 7
 }
 
-module "frontend_task" {
+module "backend_task" {
   source                   = "../../../modules/ecs/ecs-task"
   project_name             = var.project_name
   environment              = var.environment
-  family                   = "frontend"
+  family                   = "backend"
   requires_compatibilities = ["EC2"]
   cpu                      = 1024
   memory                   = 700
 
   containers = [
     {
-      name      = "jenkins"
+      name      = "backend"
       cpu       = 1024
       memory    = 700
-      image     = "jenkins/jenkins:lts-alpine"
+      image     = local.ecr["backend"].url
       essential = true
 
       portMappings = [
         {
-          containerPort = 8080
-          hostPort      = 8080
+          containerPort = 80
+          hostPort      = 80
           protocol      = "tcp"
-        }
-      ]
-
-      mountPoints = [
-        {
-          sourceVolume  = "jenkins_efs"
-          containerPath = "/var/jenkins_home"
-          readOnly      = false
         }
       ]
 
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          "awslogs-group"         = "/ecs/jenkins"
+          "awslogs-group"         = "/ecs/backend"
           "awslogs-region"        = var.region
           "awslogs-stream-prefix" = "ecs"
-        }
-      }
-
-      healthCheck = {
-        command     = ["CMD", "curl", "-f", "http://localhost:8080/login"]
-        interval    = 200
-        timeout     = 5
-        retries     = 3
-        startPeriod = 300
-      }
-    }
-  ]
-
-  volumes = [
-    {
-      name = "jenkins_efs"
-      efs_volume_configuration = {
-        file_system_id     = local.efs["jenkins"].id
-        transit_encryption = "ENABLED"
-        authorization_config = {
-          access_point_id = local.efs["jenkins"].access_points["jenkins"].id
-          iam             = "DISABLED"
         }
       }
     }
   ]
 }
+

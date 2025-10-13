@@ -36,7 +36,7 @@ module "frontend_alb" {
       port              = 80
       protocol          = "HTTP"
       target_type       = "ip"
-      health_check_path = "/"
+      health_check_path = "/api/health"
     }
   }
   listener = {
@@ -91,18 +91,18 @@ module "backend_asg" {
   subnet_ids       = local.subnets["asg"]
   security_groups  = [local.sg["asg"]]
   ecs_cluster_name = var.ecs_cluster_name
-  desired_capacity = 0
-  max_size         = 0
+  desired_capacity = 1
+  max_size         = 2
   min_size         = 0
 }
 
-module "bastion_ec2" {
-  source          = "../../../modules/ec2"
-  name            = "bastion"
-  project_name    = var.project_name
-  environment     = var.environment
-  subnet_id       = local.subnets["public"][0]
-  security_groups = [local.sg["bastion_ec2"]]
-}
+# module "bastion_ec2" {
+#   source          = "../../../modules/ec2"
+#   name            = "bastion"
+#   project_name    = var.project_name
+#   environment     = var.environment
+#   subnet_id       = local.subnets["public"][0]
+#   security_groups = [local.sg["bastion_ec2"]]
+# }
 
 
