@@ -16,17 +16,17 @@ module "ecs_cluster" {
     jenkins = {
       name            = "jenkins"
       arn             = local.asg["jenkins"].arn
-      target_capacity = 100
+      target_capacity = 90
     }
     backend = {
       name            = "backend"
       arn             = local.asg["backend"].arn
-      target_capacity = 100
+      target_capacity = 90
     }
     frontend = {
       name            = "frontend"
       arn             = local.asg["frontend"].arn
-      target_capacity = 100
+      target_capacity = 90
     }
   }
 }
@@ -120,6 +120,30 @@ module "ecs_cluster" {
 #   ]
 # }
 
+module "frontend_codedeploy" {
+  source                 = "../../../modules/codedeploy"
+  name                   = "frontend"
+  project_name           = var.project_name
+  environment            = var.environment
+  ecs_cluster_name       = module.ecs_cluster.name
+  ecs_service_name = module.frontend_service.name
+  listener_arn              = local.alb["frontend"].listener_arn
+  blue_target_group_name   = local.alb["frontend"]["blue_tg"]["web"].name
+  green_target_group_name  = local.alb["frontend"]["green_tg"]["web"].name
+}
+
+
+module "backend_codedeploy" {
+  source                 = "../../../modules/codedeploy"
+  name                   = "backend"
+  project_name           = var.project_name
+  environment            = var.environment
+  ecs_cluster_name       = module.ecs_cluster.name
+  ecs_service_name = module.backend_service.name
+  listener_arn   = local.alb["frontend"].listener_arn
+  blue_target_group_name   = local.alb["frontend"]["blue_tg"]["api"].name
+  green_target_group_name = local.alb["frontend"]["green_tg"]["api"].name
+}
 
 
 
@@ -182,3 +206,70 @@ module "backend_task" {
   ]
 }
 
+
+
+
+
+
+
+
+
+
+module "frontend_service" {
+  source                 = "../../../modules/ecs/ecs-service"
+  project_name           = var.project_name
+  environment            = var.environment
+  capacity_provider_name = module.ecs_cluster.asg_cp["frontend"].name
+  name                   = "frontend"
+  ecs_cluster_id         = module.ecs_cluster.id
+  ecs_cluster_name       = module.ecs_cluster.name
+  desired_count          = 1
+  subnet_ids             = local.subnets["frontend"]
+  security_groups        = [local.sg["frontend"]]
+  container_port         = 80
+  alb_blue_tg_arn        = local.alb["frontend"]["blue_tg"]["web"].arn
+  container_name         = "frontend"
+  task_definition_arn    = module.frontend_task.arn
+}
+
+resource "aws_cloudwatch_log_group" "frontend" {
+  name              = "/ecs/frontend"
+  retention_in_days = 7
+}
+
+module "frontend_task" {
+  source                   = "../../../modules/ecs/ecs-task"
+  project_name             = var.project_name
+  environment              = var.environment
+  family                   = "frontend"
+  requires_compatibilities = ["EC2"]
+  cpu                      = 1024
+  memory                   = 700
+
+  containers = [
+    {
+      name      = "frontend"
+      cpu       = 1024
+      memory    = 700
+      image     = local.ecr["frontend"].url
+      essential = true
+
+      portMappings = [
+        {
+          containerPort = 80
+          hostPort      = 80
+          protocol      = "tcp"
+        }
+      ]
+
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          "awslogs-group"         = "/ecs/frontend"
+          "awslogs-region"        = var.region
+          "awslogs-stream-prefix" = "ecs"
+        }
+      }
+    }
+  ]
+}

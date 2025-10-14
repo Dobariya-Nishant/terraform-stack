@@ -375,10 +375,10 @@ resource "aws_security_group" "asg" {
   vpc_id = aws_vpc.this.id
 
   ingress {
-    description = "Allow HTTPS"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
+    description     = "Allow HTTPS"
+    from_port       = 22
+    to_port         = 22
+    protocol        = "tcp"
     security_groups = [aws_security_group.bastion_ec2.id]
   }
 

@@ -12,7 +12,7 @@ module "frontend_alb" {
   environment         = var.environment
   subnet_ids          = local.subnets["public"]
   security_groups     = [local.sg["frontend_alb"]]
-  domain_names        = [local.route53.domain_name, "jenkins.${local.route53.domain_name}"]
+  domain_names        = [local.route53.domain_name, "api.${local.route53.domain_name}"]
   vpc_id              = local.vpc_id
   hostedzone_id       = local.route53.zone_id
   acm_certificate_arn = local.route53.certificate_arn
@@ -51,7 +51,7 @@ module "frontend_alb" {
       api_rule = {
         description      = "Jenkins path routing"
         target_group_key = "api"
-        patterns         = ["/api*"]
+        hosts            = ["api.${local.route53.domain_name}"]
       }
     }
   }
@@ -78,8 +78,8 @@ module "frontend_asg" {
   subnet_ids       = local.subnets["asg"]
   security_groups  = [local.sg["asg"]]
   ecs_cluster_name = var.ecs_cluster_name
-  desired_capacity = 0
-  max_size         = 0
+  desired_capacity = 1
+  max_size         = 2
   min_size         = 0
 }
 

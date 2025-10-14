@@ -25,7 +25,7 @@ resource "aws_autoscaling_group" "this" {
   ]
 
   lifecycle {
-    ignore_changes = [tag, desired_capacity]
+    ignore_changes = [tag]
   }
 
   launch_template {

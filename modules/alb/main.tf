@@ -3,13 +3,14 @@
 # ===================================
 
 resource "aws_lb" "this" {
-  name               = "${var.name}-alb-${var.environment}"
-  internal           = false
-  load_balancer_type = "application"
-  security_groups    = var.security_groups
-  subnets            = var.subnet_ids
-
+  name                             = "${var.name}-alb-${var.environment}"
+  internal                         = false
+  load_balancer_type               = "application"
+  security_groups                  = var.security_groups
+  subnets                          = var.subnet_ids
+  idle_timeout                     = 300
   enable_cross_zone_load_balancing = true
+
 
   tags = {
     Name = "${var.name}-alb-${var.environment}"
@@ -40,6 +41,15 @@ resource "aws_lb_target_group" "blue" {
     timeout             = 5
     matcher             = "200"
   }
+
+  stickiness {
+    enabled         = true
+    type            = "lb_cookie"
+    cookie_duration = 300
+  }
+
+  # 👇 Important for WebSockets — ALB must talk HTTP/1.1
+  protocol_version = "HTTP1"
 
   tags = {
     Name = "blue-${each.value.name}-tg-${var.environment}"
