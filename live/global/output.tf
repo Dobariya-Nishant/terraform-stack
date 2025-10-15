@@ -7,3 +7,7 @@ output "route53" {
     certificate_arn = module.route53.certificate_arn
   }
 }
+
+output "ci_cd_role_arn" {
+  value = module.iam.ci_cd_role_arn
+}
