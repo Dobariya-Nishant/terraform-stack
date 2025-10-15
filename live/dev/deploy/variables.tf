@@ -17,3 +17,9 @@ variable "region" {
   type        = string
 }
 
+variable "backend_secrets" {
+  description = "Map of key-value pairs representing secrets (like your .env)"
+  type        = map(string)
+  # sensitive   = true
+}
+

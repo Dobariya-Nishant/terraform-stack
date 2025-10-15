@@ -26,11 +26,8 @@ resource "aws_ecs_service" "this" {
     }
   }
 
-  dynamic "deployment_controller" {
-    for_each = var.enable_code_deploy == true ? [1] : []
-    content {
-      type = "CODE_DEPLOY"
-    }
+  deployment_controller {
+    type = var.enable_code_deploy ? "CODE_DEPLOY" : "ECS"
   }
 
   # Attach load balancer if defined

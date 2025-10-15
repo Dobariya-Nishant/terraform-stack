@@ -94,6 +94,12 @@ variable "containers" {
 }
 
 
+variable "secrets_read_arns" {
+  description = "List of Secrets Manager ARNs the ECS task should be able to read"
+  type        = list(string)
+  default     = []
+}
+
 variable "ephemeral_storage_size" {
   description = "Ephemeral storage size (GiB) for Fargate tasks."
   type        = number
