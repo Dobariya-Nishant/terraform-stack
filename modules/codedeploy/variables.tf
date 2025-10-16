@@ -50,3 +50,17 @@ variable "green_target_group_name" {
   type        = string
 }
 
+variable "container_name" {
+  description = "Deployment environment identifier (e.g., dev, staging, prod). Used for environment-specific tagging and naming."
+  type        = string
+}
+
+variable "container_port" {
+  description = "Deployment environment identifier (e.g., dev, staging, prod). Used for environment-specific tagging and naming."
+  type        = number
+}
+
+variable "task_definition_arn" {
+  description = "Deployment environment identifier (e.g., dev, staging, prod). Used for environment-specific tagging and naming."
+  type        = string
+}

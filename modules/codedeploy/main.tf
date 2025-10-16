@@ -59,6 +59,41 @@ resource "aws_codedeploy_deployment_group" "ecs_deploy_group" {
   }
 }
 
+locals {
+  task_def_parts  = split(":", var.task_definition_arn)
+  task_def_latest = join(":", slice(local.task_def_parts, 0, length(local.task_def_parts)-1))
+}
+
+
+# =========================
+# S3 Bucket for AppSpec
+# =========================
+resource "aws_s3_bucket" "ecs_appspec_bucket" {
+  bucket = "${var.name}-ecs-appspec-${var.environment}"
+
+  tags = {
+    Name  = "${var.name}-ecs-appspec-${var.environment}"
+  }
+}
+
+resource "aws_s3_object" "appspec" {
+  bucket = aws_s3_bucket.ecs_appspec_bucket.id
+  key    = "appspec.json"
+  content = data.template_file.appspec.rendered
+  acl    = "private"
+}
+
+data "template_file" "appspec" {
+  template = file("${path.module}/appspec.json.tpl")
+
+  vars = {
+    container_name       = var.container_name
+    container_port       = var.container_port
+    task_definition_arn  = local.task_def_latest
+  }
+}
+
+
 # =======================
 # IAM Role for CodeDeploy
 # =======================

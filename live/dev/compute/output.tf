@@ -11,11 +11,6 @@ output "alb" {
 
 output "asg" {
   value = {
-    jenkins = {
-      id   = module.jenkins_asg.id
-      name = module.jenkins_asg.name
-      arn  = module.jenkins_asg.arn
-    }
     frontend = {
       id   = module.frontend_asg.id
       name = module.frontend_asg.name
@@ -26,6 +21,15 @@ output "asg" {
       name = module.backend_asg.name
       arn  = module.backend_asg.arn
     }
+  }
+}
+
+output "ecs_cluster" {
+  value = {
+    id = module.ecs_cluster.id
+    name = module.ecs_cluster.name
+    arn = module.ecs_cluster.arn
+    asg_cp = module.ecs_cluster.asg_cp
   }
 }
 
