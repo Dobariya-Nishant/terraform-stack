@@ -37,6 +37,10 @@ resource "aws_ecs_service" "this" {
     container_port   = var.container_port
   }
 
+  lifecycle {
+    ignore_changes = [load_balancer, task_definition]
+  }
+
   # Placement only for EC2
   dynamic "ordered_placement_strategy" {
     for_each = var.capacity_provider_name != null ? [1] : []

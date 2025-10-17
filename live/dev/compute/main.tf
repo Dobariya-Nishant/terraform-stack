@@ -98,13 +98,13 @@ module "ecs_cluster" {
 
 
 
-# module "bastion_ec2" {
-#   source          = "../../../modules/ec2"
-#   name            = "bastion"
-#   project_name    = var.project_name
-#   environment     = var.environment
-#   subnet_id       = local.subnets["public"][0]
-#   security_groups = [local.sg["bastion_ec2"]]
-# }
+module "bastion_ec2" {
+  source          = "../../../modules/ec2"
+  name            = "bastion"
+  project_name    = var.project_name
+  environment     = var.environment
+  subnet_id       = local.subnets["public"][0]
+  security_groups = [local.sg["bastion_ec2"]]
+}
 
 

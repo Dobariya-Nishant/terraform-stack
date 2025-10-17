@@ -137,6 +137,10 @@ module "backend_task" {
           valueFrom = module.backend_secrets.secrets["STRIPE_PUBLISHABLE_KEY"]
         },
         {
+          name = "STRIPE_SECRET_KEY"
+          valueFrom = module.backend_secrets.secrets["STRIPE_SECRET_KEY"]
+        },
+        {
           name = "PASSWORD_PUBLIC_KEY"
           valueFrom = module.backend_secrets.secrets["PASSWORD_PUBLIC_KEY"]
         },
